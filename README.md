@@ -16,7 +16,7 @@ async getHealth(): Promise<string> {
         foo: 'bar',
       });
     } catch (error) {
-      console.log(AxiosConverter.getCurl(error.config));
+      console.log(AxiosConverter.getCurl(error));
     }
   }
 ```
