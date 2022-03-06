@@ -3,6 +3,8 @@ export class AxiosConverter {
   static getCurl(request: any): string {
     if (!request) return 'Error: Axios error is required';
 
+    request = request?.config || request
+    
     let header = '';
     Object.keys(request?.headers || {}).forEach((r) => (header += `--header '${r}: ${request.headers[String(r)]}' `));
 
