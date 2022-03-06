@@ -4,7 +4,8 @@ exports.AxiosConverter = void 0;
 class AxiosConverter {
     static getCurl(request) {
         if (!request)
-            return 'Error: Axios error is required';
+            return 'AxiosConverter: Axios error is required';
+        request = (request === null || request === void 0 ? void 0 : request.config) || request;
         let header = '';
         Object.keys((request === null || request === void 0 ? void 0 : request.headers) || {}).forEach((r) => (header += `--header '${r}: ${request.headers[String(r)]}' `));
         let params = '';
