@@ -1,9 +1,7 @@
 export class AxiosConverter {
   
-  static getCurl(request: any): string {
-    if (!request) return 'AxiosConverter: Axios error is required';
-
-    request = request?.config || request
+  static getCurl(request: any = {}): string {
+    if (!request?.config) return 'Axios error is required';
     
     let header = '';
     Object.keys(request?.headers || {}).forEach((r) => (header += `--header '${r}: ${request.headers[String(r)]}' `));
@@ -15,7 +13,7 @@ export class AxiosConverter {
     const paramsUrl = `${request?.params ? params : ''}`;
 
     const curl = `curl --location -g --request ${request.method.toUpperCase()}
-    '${request.url + paramsUrl}' ${header} ${request?.data ? body : ''}`;
+'${request.url + paramsUrl}' ${header} ${request?.data ? body : ''}`;
 
     return curl;
   }
