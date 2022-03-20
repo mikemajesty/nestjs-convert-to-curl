@@ -6,13 +6,13 @@ $ npm i nestjs-convert-to-curl
 
 ## Usage
 
-```js
-
+```ts
+import Axios from 'Axios';
 import { AxiosConverter } from 'nestjs-convert-to-curl';
 
 async getHealth(): Promise<string> {
     try {
-      return await this.httpService.http.post('https://url', {
+      return await Axios.post('https://url', {
         foo: 'bar',
       });
     } catch (error) {
