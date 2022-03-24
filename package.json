@@ -1,6 +1,6 @@
 {
   "name": "nestjs-convert-to-curl",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Nestjs convert Axios Error to CURL",
   "main": "dist/index.js",
   "scripts": {
@@ -8,10 +8,10 @@
     "test": "jest"
   },
   "author": "Mike Lima <mike.rodrigues.lima@gmail.com>",
-  "homepage": "https://github.com/mikemajesty/convert-axios-error-to-curl#readme",
+  "homepage": "https://github.com/mikemajesty/nestjs-convert-to-curl#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mikemajesty/convert-axios-error-to-curl.git"
+    "url": "git+https://github.com/mikemajesty/nestjs-convert-to-curl.git"
   },
   "license": "MIT",
   "dependencies": {
