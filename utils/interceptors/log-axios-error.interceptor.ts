@@ -12,11 +12,11 @@ export class LogAxiosErrorInterceptor implements NestInterceptor {
       catchError((error) => {
         if (!error?.config) throw error;
         
-        if (!error?.uuid && !error.traceId) {
-          error.traceId = uuidv4();
+        if (!error?.uuid) {
+          error.uuid = uuidv4();
         }
   
-        new Logger(`${error.traceId || error?.uuid}:`).warn(AxiosConverter.getCurl(error))
+        new Logger(error.uuid).warn(AxiosConverter.getCurl(error))
         
         throw error;
       }),
