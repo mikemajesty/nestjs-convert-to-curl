@@ -19,7 +19,12 @@ async function bootstrap() {
    app.useGlobalInterceptors(new LogAxiosErrorInterceptor());
 }
 
+```bash
+WARN [7bf7cff0-5ae6-4a7e-be87-81ec26ecfe22] curl --location -g --request POST 'http://url' --header 'Accept: application/json, text/plain, */*' --header 'Content-Type: application/json' --header 'User-Agent: axios/0.26.0' --header 'Content-Length: 13'  --data-raw '{"foo":"bar"}'
 ```
+
+```
+---
 
 <!-- method -->
 
@@ -42,7 +47,7 @@ async getHealth(): Promise<string> {
 ```
 
 ```
-curl --location -g --request POST 'https://url' --header 'Accept: application/json, text/plain, */*' --header 'Content-Type: application/json' --header 'User-Agent: axios/0.24.0' --header 'Content-Length: 13'  --data-raw '{"foo":"bar"}'
+curl --location -g --request POST 'http://url' --header 'Accept: application/json, text/plain, */*' --header 'Content-Type: application/json' --header 'User-Agent: axios/0.26.0' --header 'Content-Length: 13'  --data-raw '{"foo":"bar"}'
 ```
 
 
