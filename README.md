@@ -29,7 +29,7 @@ WARN [<traceID>] curl --location -g --request POST 'http://url' --header 'Accept
 
 ```ts
 // service.ts
-// if your prefer service interceptor
+// if your prefer customize your curl
 
 import Axios from 'Axios';
 import { AxiosConverter } from 'nestjs-convert-to-curl';
