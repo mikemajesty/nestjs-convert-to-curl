@@ -16,7 +16,7 @@ export class LogAxiosErrorInterceptor implements NestInterceptor {
           error.traceId = uuidv4();
         }
   
-        new Logger(error.traceId || error?.uuid).log(AxiosConverter.getCurl(error))
+        new Logger(`[${error.traceId || error?.uuid}] `).log(AxiosConverter.getCurl(error))
         
         throw error;
       }),
