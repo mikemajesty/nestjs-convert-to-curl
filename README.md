@@ -6,7 +6,27 @@ $ npm i nestjs-convert-to-curl
 
 ## Usage
 
+<!-- Global -->
+
 ```ts
+// main.ts
+// if your prefer global interceptor
+
+import { LogAxiosErrorInterceptor } from 'nestjs-convert-to-curl';
+
+async function bootstrap() {
+   .....
+   app.useGlobalInterceptors(new LogAxiosErrorInterceptor());
+}
+
+```
+
+<!-- method -->
+
+```ts
+// service.ts
+// if your prefer service interceptor
+
 import Axios from 'Axios';
 import { AxiosConverter } from 'nestjs-convert-to-curl';
 
@@ -22,8 +42,7 @@ async getHealth(): Promise<string> {
 ```
 
 ```
-curl --location -g --request POST
-    'https://url' --header 'Accept: application/json, text/plain, */*' --header 'Content-Type: application/json' --header 'User-Agent: axios/0.24.0' --header 'Content-Length: 13'  --data-raw '{"foo":"bar"}'
+curl --location -g --request POST 'https://url' --header 'Accept: application/json, text/plain, */*' --header 'Content-Type: application/json' --header 'User-Agent: axios/0.24.0' --header 'Content-Length: 13'  --data-raw '{"foo":"bar"}'
 ```
 
 
