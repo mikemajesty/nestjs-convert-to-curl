@@ -25,9 +25,6 @@ async function bootstrap() {
 WARN [7bf7cff0-5ae6-4a7e-be87-81ec26ecfe22] curl --location -g --request POST 'http://url' --header 'Accept: application/json, text/plain, */*' --header 'Content-Type: application/json' --header 'User-Agent: axios/0.26.0' --header 'Content-Length: 13'  --data-raw '{"foo":"bar"}'
 ```
 
-```
----
-
 <!-- method -->
 
 ```ts
