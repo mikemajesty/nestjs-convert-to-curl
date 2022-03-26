@@ -10,7 +10,7 @@ $ npm i nestjs-convert-to-curl
 
 ```ts
 // main.ts
-// if your prefer global interceptor
+// if your prefer to use in a global application
 
 import { LogAxiosErrorInterceptor } from 'nestjs-convert-to-curl';
 
@@ -22,33 +22,32 @@ async function bootstrap() {
 ```
 
 ```bash
-WARN [<traceID>] curl --location -g --request POST 'http://url' --header 'Accept: application/json, text/plain, */*' --header 'Content-Type: application/json' --header 'User-Agent: axios/0.26.0' --header 'Content-Length: 13'  --data-raw '{"foo":"bar"}'
+curl --location -g --request POST 'http://url' --header 'Accept: application/json, text/plain, */*' --header 'Content-Type: application/json' --header 'User-Agent: axios/0.26.0' --header 'Content-Length: 13'  --data-raw '{"foo":"bar"}'
 ```
 
 <!-- method -->
 
 ```ts
 // service.ts
-// if your prefer customize your curl
+// If you prefer to use in a service.
 
-import Axios from 'Axios';
 import { AxiosConverter } from 'nestjs-convert-to-curl';
 
-async getHealth(): Promise<string> {
-    try {
-      return await Axios.post('https://url', {
-        foo: 'bar',
-      });
-    } catch (error) {
-      console.log(AxiosConverter.getCurl(error));
-    }
-  }
+try {
+  return await Axios.post('https://url', {
+    foo: 'bar',
+  });
+} catch (error) {
+  console.log(AxiosConverter.getCurl(error));
+}
+
 ```
+
+---
 
 ```bash
 curl --location -g --request POST 'http://url' --header 'Accept: application/json, text/plain, */*' --header 'Content-Type: application/json' --header 'User-Agent: axios/0.26.0' --header 'Content-Length: 13'  --data-raw '{"foo":"bar"}'
 ```
-
 
 ---
 
