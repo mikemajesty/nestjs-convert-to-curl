@@ -15,7 +15,7 @@ export class AxiosConverter {
 
     let query = ''
     if (hasQueryParams.length) {
-      query = hasQueryParams[0]
+      query = hasQueryParams[0] as string
       request.url = request.url.substring(0, request.url.lastIndexOf('?'))
     }
 
