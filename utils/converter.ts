@@ -1,7 +1,7 @@
 export class AxiosConverter {
 
   static getCurl(request: any = {}): string {
-    if (!request?.config) return 'Axios error is required';
+    if (!request?.config) return 'Axios response is required';
 
     request = request.config
 
