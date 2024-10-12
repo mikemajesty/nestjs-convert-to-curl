@@ -1,6 +1,6 @@
 export class AxiosConverter {
 
-  static getCurl(request: any = {}): string {
+  static getCurl(request: any = {}, anonymizedFields: string[] = []): string {
     if (!request?.config) return 'Axios response is required';
 
     request = request.config
@@ -19,12 +19,31 @@ export class AxiosConverter {
       request.url = request.url.substring(0, request.url.lastIndexOf('?'))
     }
 
+    const body = getBody(anonymizedFields, `--data-raw '${request?.data}'`);
 
-    const body = `--data-raw '${request?.data}'`;
     const paramsUrl = `${request?.params ? params : ''}`;
 
     const curl = `curl --location -g --request ${request.method.toUpperCase()} '${request.url + paramsUrl + query}' ${header} ${request?.data ? body : ''}`;
 
-    return curl.trim();
+    return curl.trim().replace(/\\"/g, "\"");
   }
+}
+
+const getBody = (anonymizedFields: string[], body: string) => {
+  if (!anonymizedFields.length) {
+    return body
+  }
+
+  for (const field of anonymizedFields) {
+    const regexField = `("${field}":)"(.*?)"`;
+    const regex = new RegExp(`${regexField}`);
+
+    const exec = regex.exec(body);
+
+    if (exec?.length === 3) {
+      body = body.replace(exec[2], "******");
+    }
+  }
+
+  return body
 }

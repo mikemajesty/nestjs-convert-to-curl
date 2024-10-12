@@ -33,22 +33,25 @@ curl --location -g --request POST 'http://url' --header 'Accept: application/jso
 // service.ts
 // If you prefer to use in a service.
 
-
-import { AxiosConverter } from 'nestjs-convert-to-curl';
+import { AxiosConverter } from "nestjs-convert-to-curl";
 
 try {
-  return await Axios.post('https://url', {
-    foo: 'bar',
-  });
+  return await Axios.post(
+    "http://www.mymockservice.com",
+    {
+      foo: "bar",
+      password: "123mudar",
+      employee: { name: "Mike", cpf: "41288055800" },
+    },
+    { headers: { Authorization: "Bearer token" } }
+  );
 } catch (error) {
   console.log(AxiosConverter.getCurl(error));
 }
-
 ```
 
-
 ```bash
-curl --location -g --request POST 'http://url' --header 'Accept: application/json, text/plain, */*' --header 'Content-Type: application/json' --header 'User-Agent: axios/0.26.0' --header 'Content-Length: 13'  --data-raw '{"foo":"bar"}'
+curl --location -g --request POST 'http://www.mymockservice.com' --header 'Accept: application/json, text/plain, */*' --header 'Content-Type: application/json' --header 'Authorization: Bearer token' --header 'User-Agent: axios/1.6.7' --header 'Content-Length: 82' --header 'Accept-Encoding: gzip, compress, deflate, br'  --data-raw '{"foo":"bar","password":"******","employee":{"name":"Mike","cpf":"******"}}'
 ```
 
 ---
