@@ -46,7 +46,7 @@ try {
     { headers: { Authorization: "Bearer token" } }
   );
 } catch (error) {
-  console.log(AxiosConverter.getCurl(error));
+  console.log(AxiosConverter.getCurl(error, ["password", "cpf"]));
 }
 ```
 
