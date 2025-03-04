@@ -1,16 +1,39 @@
-
-  
 {
   "compilerOptions": {
-    "target": "es6",
     "module": "commonjs",
-    "outDir": "dist",
-    "paths": {},
-    "resolveJsonModule": true,
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
+    "typeRoots": [
+      "./src",
+      "./src/interceptors",
+      "node_modules/@types"
+    ],
+    "types": [
+      "jest",
+      "converter.d.ts",
+      "log-axios-error.interceptor.d.ts"
+    ],
+    "allowSyntheticDefaultImports": true,
+    "target": "es2017",
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    }
   }
 }
