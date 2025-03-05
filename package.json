@@ -1,7 +1,9 @@
 {
   "name": "nestjs-convert-to-curl",
-  "version": "1.0.1",
+  "version": "1.0.5",
   "description": "Nestjs convert Axios Error to CURL",
+  "types": "dist/src/converter.d.ts",
+  "main": "dist/src/converter.js",
   "scripts": {
     "build": "tsc",
     "test": "jest"

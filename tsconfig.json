@@ -1,21 +1,13 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
     "experimentalDecorators": true,
     "esModuleInterop": true,
-    "typeRoots": [
-      "./src",
-      "./src/interceptors",
-      "node_modules/@types"
-    ],
-    "types": [
-      "jest",
-      "converter.d.ts",
-      "log-axios-error.interceptor.d.ts"
-    ],
     "allowSyntheticDefaultImports": true,
     "target": "es2017",
     "resolveJsonModule": true,
