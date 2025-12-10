@@ -1,0 +1,91 @@
+name: Release and Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      version-bump:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+env:
+  NODE_VERSION: '20'
+  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Configure Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Bump version
+        id: bump-version
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "Current version: $CURRENT_VERSION"
+          
+          npm version ${{ github.event.inputs.version-bump }} --no-git-tag-version
+          
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "New version: $NEW_VERSION"
+          
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build package
+        run: npm run build
+
+      - name: Commit changes
+        run: |
+          git add package.json package-lock.json
+          git commit -m "chore: release v${{ steps.bump-version.outputs.new_version }}"
+          git push origin HEAD:${{ github.ref }}
+
+      - name: Create tag
+        run: |
+          git tag -a "v${{ steps.bump-version.outputs.new_version }}" -m "Release v${{ steps.bump-version.outputs.new_version }}"
+          git push origin "v${{ steps.bump-version.outputs.new_version }}"
+
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.bump-version.outputs.new_version }}
+          name: Release v${{ steps.bump-version.outputs.new_version }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
