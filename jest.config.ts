@@ -1,3 +1,4 @@
+// jest.config.ts
 import { pathsToModuleNameMapper } from 'ts-jest';
 import { compilerOptions } from './tsconfig.json';
 
@@ -7,6 +8,9 @@ export default {
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(uuid|axios)/)'
+  ],
   coveragePathIgnorePatterns: ['dist', 'node_modules', 'coverage'],
   moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths),
   testEnvironment: 'node'

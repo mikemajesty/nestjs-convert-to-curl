@@ -1,74 +1,124 @@
-import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-import { v4 as uuidv4 } from 'uuid';
-
+// src/converter.ts
 export class AxiosConverter {
-
+  /**
+   * Converte uma configuração do Axios em um comando curl
+   * @param request Configuração do Axios ou objeto com .config
+   * @param anonymizedFields Campos sensíveis para anonimizar
+   * @returns Comando curl formatado
+   */
   static getCurl(request: any = {}, anonymizedFields: string[] = []): string {
-    if (!request?.config) return 'Axios response is required';
+    // Extrai a configuração do Axios (suporta tanto axios puro quanto @nestjs/axios)
+    const axiosConfig = request?.config || request;
+    
+    if (!axiosConfig) {
+      return 'Axios config is required';
+    }
 
-    request = request.config
+    const { method = 'GET', url = '', headers = {}, params = {}, data } = axiosConfig;
 
+    // 1. Headers
     let header = '';
-    Object.keys(request?.headers || {}).forEach((r) => (header += `--header '${r}: ${request.headers[String(r)]}' `));
+    Object.keys(headers || {}).forEach((key) => {
+      const value = headers[String(key)];
+      if (value !== undefined && !['common', 'delete', 'get', 'head', 'post', 'put', 'patch'].includes(key)) {
+        header += `--header '${key}: ${value}' `;
+      }
+    });
 
-    let params = '';
-    Object.keys(request?.params || {}).forEach((p) => (params += `/${p}/${request.params[String(p)]}`));
-
-    const hasQueryParams = new RegExp('\\?.*').exec(request.url) || [];
-
-    let query = ''
-    if (hasQueryParams.length) {
-      query = hasQueryParams[0] as string
-      request.url = request.url.substring(0, request.url.lastIndexOf('?'))
-    }
-
-    const body = getBody(anonymizedFields, `--data-raw '${request?.data}'`);
-
-    const paramsUrl = `${request?.params ? params : ''}`;
-
-    const curl = `curl --location -g --request ${request.method.toUpperCase()} '${request.url + paramsUrl + query}' ${header} ${request?.data ? body : ''}`;
-
-    return curl.trim().replace(/\\"/g, "\"");
-  }
-}
-
-@Injectable()
-export class LogAxiosErrorInterceptor implements NestInterceptor {
-
-  intercept(ctx: ExecutionContext, next: CallHandler): Observable<unknown> {
-    return next.handle().pipe(
-      catchError((error) => {
-        if (!error?.config) throw error;
-
-        if (!error?.uuid) {
-          error.uuid = uuidv4();
+    // 2. URL com query params
+    let fullUrl = url || '';
+    
+    // Adiciona params como query string
+    if (params && Object.keys(params).length > 0) {
+      const queryParams = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, String(value));
         }
+      });
+      
+      const queryString = queryParams.toString();
+      if (queryString) {
+        fullUrl += (fullUrl.includes('?') ? '&' : '?') + queryString;
+      }
+    }
 
-        new Logger(error.uuid).warn(AxiosConverter.getCurl(error))
+    // 3. Body (apenas para POST, PUT, PATCH)
+    let body = '';
+    const methodUpper = (method || 'GET').toUpperCase();
+    
+    if (data && ['POST', 'PUT', 'PATCH'].includes(methodUpper)) {
+      let bodyString: string;
+      
+      if (typeof data === 'string') {
+        bodyString = data;
+      } else if (Buffer.isBuffer(data)) {
+        bodyString = '[Buffer]';
+      } else {
+        bodyString = JSON.stringify(data);
+      }
 
-        throw error;
-      }),
-    );
+      // Anonimiza campos sensíveis
+      if (anonymizedFields.length > 0) {
+        bodyString = this.anonymizeBody(bodyString, anonymizedFields);
+      }
+
+      body = `--data-raw '${bodyString}'`;
+    }
+
+    // 4. Monta o comando curl
+    const curl = `curl --location -g --request ${methodUpper} '${fullUrl}' ${header.trim()} ${body}`;
+    
+    return curl.trim().replace(/\s+/g, ' ').replace(/\\"/g, '"');
   }
-}
 
-const getBody = (anonymizedFields: string[], body: string) => {
-  if (!anonymizedFields.length) {
-    return body
-  }
-
-  for (const field of anonymizedFields) {
-    const regexField = `("${field}":)"(.*?)"`;
-    const regex = new RegExp(`${regexField}`);
-
-    const exec = regex.exec(body);
-
-    if (exec?.length === 3) {
-      body = body.replace(exec[2], "******");
+  /**
+   * Anonimiza campos sensíveis no body da requisição
+   * @param bodyString String do body (JSON ou texto)
+   * @param anonymizedFields Campos para anonimizar
+   * @returns Body com campos anonimizados
+   */
+  private static anonymizeBody(bodyString: string, anonymizedFields: string[]): string {
+    try {
+      const parsed = JSON.parse(bodyString);
+      
+      anonymizedFields.forEach(field => {
+        // Busca simples (ex: "password": "123")
+        if (parsed[field] !== undefined) {
+          parsed[field] = '******';
+        }
+        
+        if (field.includes('.')) {
+          const parts = field.split('.');
+          let current: any = parsed;
+          
+          for (let i = 0; i < parts.length - 1; i++) {
+            if (current && typeof current === 'object' && current[parts[i]]) {
+              current = current[parts[i]];
+            } else {
+              current = null;
+              break;
+            }
+          }
+          
+          if (current && current[parts[parts.length - 1]] !== undefined) {
+            current[parts[parts.length - 1]] = '******';
+          }
+        }
+      });
+      
+      return JSON.stringify(parsed);
+    } catch {
+      // Se não for JSON válido, usa regex
+      let anonymized = bodyString;
+      
+      anonymizedFields.forEach(field => {
+        // Procura por padrões como: "field": "value"
+        const regex = new RegExp(`("${field}"\\s*:\\s*)"([^"]*)"`, 'gi');
+        anonymized = anonymized.replace(regex, `$1"******"`);
+      });
+      
+      return anonymized;
     }
   }
-
-  return body
 }
