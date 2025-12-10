@@ -4,15 +4,19 @@
   "description": "Nestjs convert Axios Error to CURL",
   "types": "dist/src/converter.d.ts",
   "main": "dist/src/converter.js",
+  "files": [
+    "dist/src/**/*",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc",
     "test": "jest"
   },
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./dist/src/converter.js",
+      "require": "./dist/src/converter.js",
+      "types": "./dist/src/converter.d.ts"
     },
     "./package.json": "./package.json"
   },
