@@ -1,0 +1,101 @@
+name: Release and Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      version-bump:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+env:
+  NODE_VERSION: '24'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # para commit, tag e release
+      id-token: write   # para Trusted Publishing (OIDC) no npm
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: 'https://registry.npmjs.org/'
+          scope: '@mikemajesty'
+
+      - name: Verify npm version
+        run: |
+          node -v
+          npm -v
+          NPM_VER=$(npm -v)
+          REQUIRED="11.5.1"
+          if [ "$(printf '%s\n' "$REQUIRED" "$NPM_VER" | sort -V | head -n1)" != "$REQUIRED" ]; then
+            echo "npm $NPM_VER < $REQUIRED — Trusted Publishing não vai funcionar"
+            exit 1
+          fi
+          echo "npm OK para Trusted Publishing"
+
+      - name: Configure Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Pull latest changes
+        run: git pull origin ${{ github.ref_name }} --rebase
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build package
+        run: npm run build
+
+      - name: Bump version
+        id: bump-version
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "Current version: $CURRENT_VERSION"
+
+          npm version ${{ github.event.inputs.version-bump }} --no-git-tag-version
+
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "New version: $NEW_VERSION"
+
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Commit changes
+        run: |
+          git add package.json package-lock.json
+          git commit -m "chore: release v${{ steps.bump-version.outputs.new_version }}"
+          git push origin HEAD:${{ github.ref_name }}
+
+      - name: Create tag
+        run: |
+          git tag -a "v${{ steps.bump-version.outputs.new_version }}" -m "Release v${{ steps.bump-version.outputs.new_version }}"
+          git push origin "v${{ steps.bump-version.outputs.new_version }}"
+
+      - name: Publish to npm (Trusted Publishing)
+        run: npm publish --access public
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.bump-version.outputs.new_version }}
+          name: Release v${{ steps.bump-version.outputs.new_version }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
